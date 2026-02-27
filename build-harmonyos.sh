@@ -84,7 +84,7 @@ echo ""
 echo "[信息] 复制库文件到 $OUTPUT_DIR..."
 
 # 复制生成的 .so 文件
-cp "target/$RUST_TARGET/release/libTTHSD.so" "$OUTPUT_DIR/libTTHSD.so"
+cp "target/$RUST_TARGET/release/tthsd.so" "$OUTPUT_DIR/tthsd_harmonyos.so"
 
 if [ $? -ne 0 ]; then
     echo "[错误] 复制文件失败"
@@ -95,11 +95,11 @@ echo ""
 echo "========================================"
 echo "  构建成功!"
 echo "========================================"
-echo "输出文件: $OUTPUT_DIR/libTTHSD.so"
+echo "输出文件: $OUTPUT_DIR/tthsd_harmonyos.so"
 echo ""
 echo "使用方法:"
 echo "1. 将 HarmonyOS/libs 文件夹复制到 HarmonyOS 项目的 entry/libs/ 目录"
 echo "2. 在 build-profile.json5 中配置 abiFilters: [\"$OHOS_ARCH\"]"
-echo "3. 在 ArkTS 代码中加载库: System.loadLibrary(\"TTHSD\")"
+echo "3. 在 ArkTS 代码中加载库: System.loadLibrary(\"tthsd_harmonyos\")"
 echo "4. 调用 C 接口函数进行下载操作"
 echo ""
