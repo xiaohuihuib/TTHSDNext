@@ -90,7 +90,7 @@ echo ""
 echo "[信息] 复制库文件到 $OUTPUT_DIR..."
 
 # 复制生成的 .so 文件
-cp "target/$RUST_TARGET/release/tthsd.so" "$OUTPUT_DIR/tthsd.so"
+cp "target/$RUST_TARGET/release/libTTHSD.so" "$OUTPUT_DIR/libTTHSD.so"
 
 if [ $? -ne 0 ]; then
     echo "[错误] 复制文件失败"
@@ -101,9 +101,9 @@ echo ""
 echo "========================================"
 echo "  构建成功!"
 echo "========================================"
-echo "输出文件: $OUTPUT_DIR/tthsd.so"
+echo "输出文件: $OUTPUT_DIR/libTTHSD.so"
 echo ""
 echo "使用方法:"
 echo "1. 将 jniLibs 文件夹复制到 Android 项目的 src/main/ 目录"
-echo "2. 在 Java/Kotlin 代码中加载库: System.loadLibrary(\"tthsd\")"
+echo "2. 在 Java/Kotlin 代码中加载库: System.loadLibrary(\"TTHSD\")"
 echo ""
