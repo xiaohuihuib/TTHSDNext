@@ -2,10 +2,10 @@ name: TTHSD Next — 跨平台构建与测试
 
 on:
   push:
-    branches: [main, master, dev]
-    tags: ['v*']
+    branches: [main, develop]
+    tags: ['v*', 'test_v*']
   pull_request:
-    branches: [main, master]
+    branches: [main, develop]
 
 env:
   CARGO_TERM_COLOR: always

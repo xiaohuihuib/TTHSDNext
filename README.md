@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>TTHSD Next (TiTi High Speed Downloader)</h1>
+  <h1>TTHSD Next (TT High Speed Downloader)</h1>
   <p>一个高性能、跨平台、多语言可调用的下载引擎内核</p>
   <img src="https://img.shields.io/badge/Rust-1.75+-orange.svg" alt="Rust Version">
   <img src="https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Android%20%7C%20HarmonyOS-blue.svg" alt="Platform">
