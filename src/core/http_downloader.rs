@@ -328,7 +328,20 @@ impl Downloader for HTTPDownloader {
             .create(true)
             .open(&task.save_path).await?;
 
-        file.set_len(file_size as u64).await?;
+        // FAT32 文件系统单文件上限为 4GB，超过时给出明确提示
+        const FAT32_MAX_FILE_SIZE: i64 = 4_294_967_295; // 4GB - 1 byte
+        
+        // 尝试预分配文件大小（提升多线程分块写入性能）
+        // 如果失败（例如 FAT32 文件系统不支持大文件），则跳过预分配继续下载
+        if let Err(e) = file.set_len(file_size as u64).await {
+            if file_size > FAT32_MAX_FILE_SIZE {
+                return Err(format!(
+                    "文件大小 ({:.2} GB) 超过 FAT32 文件系统的 4GB 限制，请将目标路径改为 NTFS/exFAT 分区",
+                    file_size as f64 / 1024.0 / 1024.0 / 1024.0
+                ).into());
+            }
+            eprintln!("警告: 无法预分配文件空间 ({}), 将继续下载", e);
+        }
 
         let thread_count = if let Some(ref config) = self.base.config {
             let cfg = config.read().await;
