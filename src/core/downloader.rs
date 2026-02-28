@@ -185,6 +185,7 @@ impl HSDownloader {
         let monitor_config = self.config.clone();
         let monitor_ws = self.ws_client.clone();
         let monitor_socket = self.socket_client.clone();
+        let monitor_token = token.clone();
         let monitor_handle = tokio::spawn(async move {
             let mut interval = tokio::time::interval(std::time::Duration::from_millis(500));
             loop {
@@ -197,8 +198,6 @@ impl HSDownloader {
                             if let Some(total_bytes) = stats.get("total_bytes").cloned() {
                                 stats.insert("Downloaded".to_string(), total_bytes);
                             }
-                            // 进度条的 Total 值，在 start_download 的最开始通过 file_size 确定并放进 monitor 里，如果是总计可以取某个特定值。
-                            // 目前我们从全局监控拿不到总文件大小，所以只能先通过 Downloader 自身状态去取
                             let event = Event {
                                 event_type: EventType::Update,
                                 name: "进度更新".to_string(),
@@ -211,13 +210,22 @@ impl HSDownloader {
                     _ = progress_done_rx.recv() => {
                         break;
                     }
+                    _ = monitor_token.cancelled() => {
+                        break;
+                    }
                 }
             }
         });
 
+        // 等待所有下载任务完成，或者被取消
         while let Some(result) = join_set.join_next().await {
             if let Err(e) = result {
                 eprintln!("Task failed: {:?}", e);
+            }
+            // 如果 token 被取消（暂停/停止），中止剩余任务
+            if token.is_cancelled() {
+                join_set.abort_all();
+                break;
             }
         }
 
@@ -295,6 +303,7 @@ impl HSDownloader {
         let monitor_config = self.config.clone();
         let monitor_ws = self.ws_client.clone();
         let monitor_socket = self.socket_client.clone();
+        let monitor_token = token.clone();
         let monitor_handle = tokio::spawn(async move {
             let mut interval = tokio::time::interval(std::time::Duration::from_millis(500));
             loop {
@@ -303,7 +312,7 @@ impl HSDownloader {
                         if let Some(monitor) = get_global_monitor().await {
                             let mut stats = monitor.get_stats().await;
                             
-                            // 兼容旧版 Golang 接口的字段命名 (各语言 Bindings 依赖这两个字段计算进度)
+                            // 兼容旧版 Golang 接口的字段命名
                             if let Some(total_bytes) = stats.get("total_bytes").cloned() {
                                 stats.insert("Downloaded".to_string(), total_bytes);
                             }
@@ -320,13 +329,21 @@ impl HSDownloader {
                     _ = progress_done_rx.recv() => {
                         break;
                     }
+                    _ = monitor_token.cancelled() => {
+                        break;
+                    }
                 }
             }
         });
 
+        // 等待所有下载任务完成，或者被取消
         while let Some(result) = join_set.join_next().await {
             if let Err(e) = result {
                 eprintln!("Task failed: {:?}", e);
+            }
+            if token.is_cancelled() {
+                join_set.abort_all();
+                break;
             }
         }
 
